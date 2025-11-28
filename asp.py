@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Union
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -134,3 +134,4 @@ def angular_spectrum_propagation(
 
 
     return output_intensity
+
