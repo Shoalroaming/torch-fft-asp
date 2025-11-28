@@ -108,8 +108,8 @@ def angular_spectrum_propagation(
         pad_pixels = 0
 
     f = fftshift(fftfreq(N, pixel_size_m, device=device))
-    f_sq = f**2
-    freq_sq = f_sq[:, None] + f_sq[None, :]  # f_x² + f_y²
+    fx, fy = torch.meshgrid(f, f, indexing='xy')
+    freq_sq = fx**2 + fy**2
 
     k = 2 * torch.pi / wavelength_m
     z = distance_mm * 1e-3
