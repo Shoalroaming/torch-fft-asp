@@ -26,32 +26,26 @@ def validate_inputs(
     异常:
         ValueError: 当任何参数不满足要求时
     """
-    # 检查距离
-    if not (isinstance(distance_mm, (int, float)) and distance_mm >= 0):
-        raise ValueError(f"传播距离必须是非负数字: {distance_mm}")
     
-    # 检查物理参数
+    if not (isinstance(distance_mm, (int, float)) and distance_mm >= 0):
+        raise ValueError(f"传播距离必须是非负数字: {distance_mm}")   
     if wavelength_m <= 0:
         raise ValueError(f"波长必须为正数: {wavelength_m}")
     if pixel_size_m <= 0:
         raise ValueError(f"像素尺寸必须为正数: {pixel_size_m}")
     if not (isinstance(pad_factor, (int, float)) and pad_factor >= 1.0):
         raise ValueError(f"填充因子必须≥1.0: {pad_factor}")
-    
-    # 检查形状匹配
     if phase.shape != intensity.shape:
         raise ValueError(
             f"相位图和光强图尺寸不匹配:\n"
             f"  相位图: {phase.shape}\n"
             f"  光强图: {intensity.shape}"
         )
-    
-    # 检查是否为正方形 
+        
     H, W = phase.shape[-2:]
     if H != W:
         raise ValueError(f"输入为正方形，但当前空间尺寸为 {H}x{W}")
-    
-    # 检查维度
+
     ndim = phase.ndim
     if ndim not in [2, 3, 4]:
         raise ValueError(
@@ -76,7 +70,7 @@ def angular_spectrum_propagation(
         distance_mm: 传播距离 [mm]
         wavelength_m: 波长 [m]
         pixel_size_m: 像素尺寸 [m]
-        pad_factor: 填充倍数（1=不填充，1.25=边缘各加12.5%的0）
+        pad_factor: 填充倍数（1=不填充，1.5=填充后边长变为1.5倍）
     
     返回:
         传播后的光强分布 [B,C,H,W] 或根据输入降维
@@ -137,5 +131,6 @@ def angular_spectrum_propagation(
         output_intensity = output_intensity.squeeze(0).squeeze(0)
     elif phase.ndim == 3:
         output_intensity = output_intensity.squeeze(0)
+
 
     return output_intensity
