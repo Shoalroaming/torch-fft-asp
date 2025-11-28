@@ -96,13 +96,13 @@ def angular_spectrum_propagation(
     
     B, C, H, W = phase_t.shape
     amplitude = intensity_t.sqrt()
-    complex_field = amplitude * torch.exp(1j * phase_t)
+    field = amplitude * torch.exp(1j * phase_t)
 
     # 填充
     if pad_factor > 1.0:
         pad_pixels = int(H * (pad_factor - 1) / 2) 
-        complex_field = F.pad(complex_field, (pad_pixels,)*4, mode='constant', value=0)
-        N = complex_field.shape[-1]
+        field = F.pad(field, (pad_pixels,)*4, mode='constant', value=0)
+        N = field.shape[-1]
     else:
         N = H
         pad_pixels = 0
@@ -117,7 +117,7 @@ def angular_spectrum_propagation(
     inside = 1 - (wavelength_m**2) * freq_sq
     h_filter = torch.exp(1j * k * z * torch.sqrt(inside))
 
-    field_fft = fftshift(fft2(complex_field, norm='ortho'))
+    field_fft = fftshift(fft2(field, norm='ortho'))
     propagated = ifft2(ifftshift(field_fft * h_filter), norm='ortho')
 
     # 裁剪
