@@ -19,7 +19,6 @@ def validate_inputs(
     pixel_size_m: float,
     pad_factor: float,
 ) -> None:
-    """参数安全性检查"""
     if not (isinstance(distance_mm, (int, float)) and distance_mm >= 0):
         raise ValueError(f"传播距离必须是非负数字: {distance_mm}")
     if wavelength_m <= 0:
@@ -30,14 +29,16 @@ def validate_inputs(
         raise ValueError(f"填充因子必须≥1.0: {pad_factor}")
     if phase.shape != intensity.shape:
         raise ValueError(f"相位图和光强图尺寸不匹配: {phase.shape} vs {intensity.shape}")
-    
+
     H, W = phase.shape[-2:]
     if H != W:
         raise ValueError(f"输入空间尺寸必须为正方形，但当前为 {H}x{W}")
-    
-    # 只支持2D或3D
-    if phase.ndim not in [2, 3]:
-        raise ValueError(f"输入维度必须是2D (H,W) 或 3D (B,H,W)，当前为 {phase.ndim}D")
+
+    if phase.ndim == 4:
+        if phase.shape[1] != 1:
+            raise ValueError(f"4D输入的通道维度必须为1，但得到 {phase.shape[1]}")
+    elif phase.ndim not in [2, 3]:
+        raise ValueError(f"输入维度必须是2D (H,W)、3D (B,H,W) 或 4D (B,1,H,W)，当前为 {phase.ndim}D")
 
 def angular_spectrum_propagation(
     phase: Union[torch.Tensor, np.ndarray],
@@ -51,15 +52,15 @@ def angular_spectrum_propagation(
     角谱法衍射传播
     
     参数:
-        phase: 相位图 [rad], shape: (H,W) 或 (B,H,W)
-        intensity: 光强图, shape必须与phase匹配
+        phase: 相位图 [rad], 维度: (H,W), (B,H,W) 或 (B,1,H,W)
+        intensity: 光强图, 维度必须与phase匹配
         distance_mm: 传播距离 [mm]
         wavelength_m: 波长 [m]
         pixel_size_m: 像素尺寸 [m]
         pad_factor: 填充倍数（1=不填充，1.5=填充后边长变为1.5倍）
     
     返回:
-        传播后的光强分布, shape与输入相同
+        传播后的光强分布, 维度与输入相同
     """
     validate_inputs(phase, intensity, distance_mm, wavelength_m, pixel_size_m, pad_factor)
     
@@ -67,10 +68,16 @@ def angular_spectrum_propagation(
     phase_t = to_tensor(phase, device)
     intensity_t = to_tensor(intensity, device)
     
+    original_shape = phase_t.shape
     is_single_image = phase_t.ndim == 2
-    if is_single_image:
-        phase_t = phase_t.unsqueeze(0)  # [1, H, W]
+    
+    # 统一为 (B,H,W)
+    if phase_t.ndim == 2:
+        phase_t = phase_t.unsqueeze(0)
         intensity_t = intensity_t.unsqueeze(0)
+    elif phase_t.ndim == 4:
+        phase_t = phase_t.squeeze(1)
+        intensity_t = intensity_t.squeeze(1)
     
     B, H, W = phase_t.shape
     
@@ -107,6 +114,7 @@ def angular_spectrum_propagation(
     
     if is_single_image:
         output_intensity = output_intensity.squeeze(0)
+    elif len(original_shape) == 4:
+        output_intensity = output_intensity.unsqueeze(1)
     
     return output_intensity
-
