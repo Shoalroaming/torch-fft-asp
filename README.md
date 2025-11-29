@@ -38,7 +38,7 @@ angular_spectrum_propagation(
 
 ## 使用示例
 
-高斯光束传播测试
+### 高斯光束传播测试
 
 ```bash
 python test_gaussian.py
@@ -46,7 +46,7 @@ python test_gaussian.py
 
 验证角谱法在瑞利长度范围内的传播精度。
 
-实际图像传播测试
+### 实际图像传播测试
 
 ```bash
 python test_real_image.py  
