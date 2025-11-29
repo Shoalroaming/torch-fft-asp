@@ -18,9 +18,7 @@
 ├─ dog=20mm.tif        # 20mm处灰度图
 ├─ dog=19.9mm.tif      # 19.1mm处灰度图
 ├─ dog=20.1mm.tif      # 20.1mm处灰度图
- dogPhi=20mm.tif     # 20mm处相位图
-├─
-└─
+└─ dogPhi=20mm.tif     # 20mm处相位图
 ```
 
 ## 核心函数
