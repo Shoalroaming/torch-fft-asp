@@ -19,8 +19,8 @@ def validate_inputs(
     pixel_size_m: float,
     pad_factor: float,
 ) -> None:
-    if not (isinstance(distance_mm, (int, float)) and distance_mm >= 0):
-        raise ValueError(f"传播距离必须是非负数字: {distance_mm}")
+    if not (isinstance(distance_mm, (int, float))):
+        raise ValueError(f"传播距离必须是数字: {distance_mm}")
     if wavelength_m <= 0:
         raise ValueError(f"波长必须为正数: {wavelength_m}")
     if pixel_size_m <= 0:
@@ -118,3 +118,4 @@ def angular_spectrum_propagation(
         output_intensity = output_intensity.unsqueeze(1)
     
     return output_intensity
+
