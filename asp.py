@@ -2,7 +2,7 @@ from typing import Union
 import numpy as np
 import torch
 import torch.nn.functional as F
-from torch.fft import fft2, ifft2, fftshift, ifftshift
+from torch.fft import fft2, ifft2, fftshift, ifftshift，fftfreq
 
 def to_tensor(x: Union[torch.Tensor, np.ndarray], device: torch.device) -> torch.Tensor:
     if not isinstance(x, torch.Tensor):
@@ -92,7 +92,7 @@ def angular_spectrum_propagation(
         N = H
         pad_pixels = 0
     
-    f = fftshift(torch.fft.fftfreq(N, pixel_size_m, device=device))
+    f = fftshift(fftfreq(N, pixel_size_m, device=device))
     fx, fy = torch.meshgrid(f, f, indexing='xy')
     freq_sq = fx**2 + fy**2
     
@@ -118,4 +118,5 @@ def angular_spectrum_propagation(
         output_intensity = output_intensity.unsqueeze(1)
     
     return output_intensity
+
 
