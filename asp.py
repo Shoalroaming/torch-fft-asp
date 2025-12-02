@@ -2,7 +2,7 @@ from typing import Union
 import numpy as np
 import torch
 import torch.nn.functional as F
-from torch.fft import fft2, ifft2, fftshift, ifftshift，fftfreq
+from torch.fft import fft2, ifft2, fftfreq
 
 def to_tensor(x: Union[torch.Tensor, np.ndarray], device: torch.device) -> torch.Tensor:
     if not isinstance(x, torch.Tensor):
@@ -20,7 +20,7 @@ def validate_inputs(
     pad_factor: float,
 ) -> None:
     if not (isinstance(distance_mm, (int, float))):
-        raise ValueError(f"传播距离必须是数字: {distance_mm}")
+        raise ValueError(f"传播距离必须是数字或数组: {distance_mm}")
     if wavelength_m <= 0:
         raise ValueError(f"波长必须为正数: {wavelength_m}")
     if pixel_size_m <= 0:
@@ -92,7 +92,7 @@ def angular_spectrum_propagation(
         N = H
         pad_pixels = 0
     
-    f = fftshift(fftfreq(N, pixel_size_m, device=device))
+    f = fftfreq(N, pixel_size_m, device=device)
     fx, fy = torch.meshgrid(f, f, indexing='xy')
     freq_sq = fx**2 + fy**2
     
@@ -104,8 +104,8 @@ def angular_spectrum_propagation(
     phase_shift = k * z * (inside * mask).sqrt()
     h_filter = torch.exp(1j * phase_shift) * mask
     
-    field_fft = fftshift(fft2(field, norm='ortho'))
-    propagated = ifft2(ifftshift(field_fft * h_filter), norm='ortho')
+    field_fft = fft2(field, norm='ortho')
+    propagated = ifft2((field_fft * h_filter), norm='ortho')
     
     if pad_pixels > 0:
         propagated = propagated[..., pad_pixels:-pad_pixels, pad_pixels:-pad_pixels]
@@ -118,5 +118,3 @@ def angular_spectrum_propagation(
         output_intensity = output_intensity.unsqueeze(1)
     
     return output_intensity
-
-
